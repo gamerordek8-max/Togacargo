@@ -1,0 +1,113 @@
+echo '<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><style>
+body{margin:0;background:#000;overflow:hidden;touch-action:none;font-family:sans-serif;color:#fff;-webkit-user-select:none;user-select:none}
+#menu,#over{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.96);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;text-align:center}
+.btn{width:90px;height:90px;border-radius:50%;border:5px solid #555;font-size:40px;background:#222;color:#fff;display:flex;align-items:center;justify-content:center;touch-action:none}
+#ui{position:fixed;top:15px;left:15px;z-index:10;display:none;background:rgba(0,0,0,0.8);padding:15px;border-radius:15px;border:2px solid gold}
+.controls{position:fixed;bottom:30px;width:100%;display:none;justify-content:space-between;padding:0 25px;box-sizing:border-box;align-items:flex-end}
+.pedals{display:flex;flex-direction:column;gap:15px;align-items:center}
+#g{background:#2ecc71;box-shadow:0 0 20px #2ecc71}#b{background:#e74c3c;box-shadow:0 0 20px #e74c3c}
+.sel{margin:10px;padding:12px;background:#111;border:2px solid gold;color:#fff;border-radius:10px;width:170px;font-weight:bold}
+#shield{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:30px;color:gold;display:none;font-weight:bold;text-shadow:0 0 10px gold}
+h1{color:gold;text-shadow:2px 2px #000;letter-spacing:3px;margin:0}
+</style><script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script></head>
+<body><div id="shield">KORUMA AKTIF</div><div id="menu"><h1>KLASIK YARIS PRO</h1><p>KASA: $<span id="mny">0</span></p>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">
+<div>ATMOSFER:<br><button class="sel" onclick="tgM()">GUNDUZ</button></div>
+<div>TRAFIK:<br><button class="sel" onclick="tgD()">NORMAL</button></div>
+<div>ARAC:<br><button class="sel" onclick="chC()">DEGISTIR</button></div>
+<div id="cN" style="font-size:12px;color:gold;margin-top:10px">SARI F1 (160HP)</div>
+</div>
+<button onclick="start()" style="padding:20px 70px;background:gold;border:none;color:#000;border-radius:50px;font-weight:bold;font-size:24px">BASLA</button></div>
+<div id="over" style="display:none"><h1>KAZA YAPTIN!</h1><button onclick="location.reload()" style="padding:15px 40px;background:#fff;border:none;border-radius:12px;font-weight:bold">TEKRAR DENE</button></div>
+<div id="ui">HIZ: <span id="s">0</span> KM/H<br>PARA: $<span id="curM">0</span></div>
+<div class="controls" id="ctrl">
+<div style="display:flex;gap:15px"><button class="btn" id="l">⬅️</button><button class="btn" id="r">➡️</button></div>
+<div class="pedals"><button class="btn" id="g">⚡</button><button class="btn" id="b">🛑</button></div>
+</div>' > index.html
+
+  echo '<script>let s,cm,rn,p,sp=0,rds=[],ais=[],active=false,canDie=false,mIdx=0,dIdx=1,cIdx=0,money=parseInt(localStorage.getItem("money"))||0;
+const cars=[{n:"SARI F1",hp:160,p:0,c:0xffff00},{n:"MAVI CANAVAR",hp:230,p:5000,c:0x0000ff},{n:"SIYAH SUPRA",hp:330,p:15000,c:0x111111}];
+function tgM(){mIdx=(mIdx+1)%2;event.target.innerText=mIdx==0?"GUNDUZ":"GECE"}
+function tgD(){dIdx=(dIdx+1)%3;event.target.innerText=["AZ","NORMAL","YOGUN"][dIdx]}
+function chC(){cIdx=(cIdx+1)%3;document.getElementById("cN").innerText=cars[cIdx].n+" ("+cars[cIdx].hp+"HP)"}
+function init(){s=new THREE.Scene();s.background=new THREE.Color(mIdx==0?0x87ceeb:0x000011);
+cm=new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,0.1,1000);
+rn=new THREE.WebGLRenderer({antialias:true});rn.setSize(window.innerWidth,window.innerHeight);document.body.appendChild(rn.domElement);
+const l=new THREE.DirectionalLight(0xffffff,mIdx==0?1.5:0.5);l.position.set(10,30,10);s.add(l);s.add(new THREE.AmbientLight(0xffffff,0.6));
+mkP();for(let i=0;i<10;i++)mkR(i*-50);cm.position.set(0,5,12);addEv();an();document.getElementById("mny").innerText=money;}
+function mkP(){if(p)s.remove(p);p=new THREE.Group();
+let b=new THREE.Mesh(new THREE.BoxGeometry(2.2,0.8,4.8),new THREE.MeshPhongMaterial({color:cars[cIdx].c}));b.position.y=0.4;p.add(b);
+let k=new THREE.Mesh(new THREE.BoxGeometry(1.6,0.7,2),new THREE.MeshPhongMaterial({color:0x222222}));k.position.set(0,1.1,-0.2);p.add(k);s.add(p)}
+function start(){if(money<cars[cIdx].p){alert("PARA YETERSIZ!");return}
+active=true;mkP();document.getElementById("menu").style.display="none";document.getElementById("ui").style.display="block";document.getElementById("ctrl").style.display="flex";
+document.getElementById("shield").style.display="block";
+const d=[15,30,50];for(let i=0;i<d[dIdx];i++)mkA((i*-120)-500);setTimeout(()=>{canDie=true;document.getElementById("shield").style.display="none"},5000)}' >> index.html
+    echo 'function mkR(z){let g=new THREE.Group();
+let rd=new THREE.Mesh(new THREE.PlaneGeometry(36,50),new THREE.MeshPhongMaterial({color:0x1a1a1a}));rd.rotation.x=-Math.PI/2;g.add(rd);
+for(let i=0;i<2;i++){
+let b=new THREE.Mesh(new THREE.BoxGeometry(1.2,4,50),new THREE.MeshPhongMaterial({color:i==0?0xcc0000:0xeeeeee}));
+b.position.set(i==0?18.2:-18.2,2,0);g.add(b);
+}
+g.position.z=z;s.add(g);rds.push(g)}
+function mkA(z){let a=new THREE.Group();
+let b=new THREE.Mesh(new THREE.BoxGeometry(2.6,1.4,5),new THREE.MeshPhongMaterial({color:Math.random()*0xffffff}));b.position.y=0.7;a.add(b);
+a.position.set(Math.random()*28-14,0,z);s.add(a);ais.push(a)}' >> index.html
+    echo 'let mv={l:false,r:false,g:false,b:false};
+function addEv(){const d=document;const listen=(id,k,v)=>d.getElementById(id).addEventListener("touchstart",(e)=>{e.preventDefault();mv[k]=v},{passive:false});
+const stop=(id,k,v)=>d.getElementById(id).addEventListener("touchend",(e)=>{e.preventDefault();mv[k]=v},{passive:false});
+listen("l","l",true);stop("l","l",false);listen("r","r",true);stop("r","r",false);listen("g","g",true);stop("g","g",false);listen("b","b",true);stop("b","b",false)}
+function an(){requestAnimationFrame(an);if(!active){rn.render(s,cm);if(p)p.rotation.y+=0.01;return}
+let mH=cars[cIdx].hp;if(mv.g)sp=Math.min(sp+2.5,mH);else if(mv.b)sp=Math.max(sp-6,0);else sp=Math.max(sp-1.2,0);
+p.position.z-=sp/100;if(mv.l)p.position.x-=0.75;if(mv.r)p.position.x+=0.75;
+rds.forEach(r=>{if(p.position.z<r.position.z-50)r.position.z-=500});
+ais.forEach(a=>{a.position.z+=0.4;if(a.position.z>p.position.z+40)a.position.z-=1800;
+let dx=Math.abs(p.position.x-a.position.x);let dz=Math.abs(p.position.z-a.position.z);
+if(canDie&&sp>40&&dx<2.4&&dz<4.6)go()});
+if(canDie&&Math.abs(p.position.x)>16.8)go();
+cm.position.lerp(new THREE.Vector3(p.position.x,p.position.y+6,p.position.z+14),0.2);cm.lookAt(p.position);
+document.getElementById("s").innerText=Math.floor(sp);document.getElementById("curM").innerText=money;rn.render(s,cm)}
+function go(){active=false;canDie=false;let g=Math.floor(Math.abs(p.position.z)/10);money+=g;localStorage.setItem("money",money);
+document.getElementById("over").style.display="flex"}init();</script></body></html>' >> index.html
+echo 'function mkA(z){
+  let a = new THREE.Group();
+  
+  // Araba Gövdesi
+  let body = new THREE.Mesh(
+    new THREE.BoxGeometry(2.6, 1.2, 5), 
+    new THREE.MeshPhongMaterial({color: Math.random() * 0xffffff})
+  );
+  body.position.y = 0.6;
+  a.add(body);
+
+  // Araba Tavanı ve Camlar
+  let roof = new THREE.Mesh(
+    new THREE.BoxGeometry(2, 0.8, 2.5), 
+    new THREE.MeshPhongMaterial({color: 0x222222})
+  );
+  roof.position.set(0, 1.4, -0.2);
+  a.add(roof);
+
+  // Ön Farlar (Beyaz)
+  let lightGeo = new THREE.BoxGeometry(0.6, 0.3, 0.1);
+  let whiteMat = new THREE.MeshPhongMaterial({color: 0xffffff, emissive: 0xffffff});
+  let fl = new THREE.Mesh(lightGeo, whiteMat);
+  fl.position.set(0.8, 0.6, -2.5);
+  a.add(fl);
+  let fr = new THREE.Mesh(lightGeo, whiteMat);
+  fr.position.set(-0.8, 0.6, -2.5);
+  a.add(fr);
+
+  // Arka Stop Lambaları (Kırmızı)
+  let redMat = new THREE.MeshPhongMaterial({color: 0xff0000, emissive: 0xff0000});
+  let rl = new THREE.Mesh(lightGeo, redMat);
+  rl.position.set(0.8, 0.6, 2.5);
+  a.add(rl);
+  let rr = new THREE.Mesh(lightGeo, redMat);
+  rr.position.set(-0.8, 0.6, 2.5);
+  a.add(rr);
+
+  a.position.set(Math.random() * 28 - 14, 0, z);
+  s.add(a);
+  ais.push(a);
+}' >> index.html
+python -m http.server 6969
